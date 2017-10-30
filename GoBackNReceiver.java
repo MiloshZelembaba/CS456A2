@@ -17,7 +17,8 @@ public class GoBackNReceiver {
 
         // write recvInfo for the channel
         FileWriter fileWriter = new FileWriter("recvInfo");
-        fileWriter.write(serverSocket.getLocalAddress() + " " +serverSocket.getLocalPort());
+        String serverAddress = serverSocket.getLocalAddress().toString();
+        fileWriter.write(serverAddress.replace("/","") + " " +serverSocket.getLocalPort());
         fileWriter.close();
     }
 
