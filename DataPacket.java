@@ -5,8 +5,10 @@ import java.nio.ByteBuffer;
  */
 public class DataPacket extends Packet {
     private byte[] data;
+    private boolean acked;
 
     public DataPacket(int seqn){
+        acked = false;
         packetType = toArray(Packet.DATA); // number for a data packet
         sequenceNumber = toArray(seqn);
     }
@@ -18,6 +20,14 @@ public class DataPacket extends Packet {
         buffer.put(sequenceNumber);
         buffer.put(data);
         return buffer.array();
+    }
+
+    public void ack(){
+        acked = true;
+    }
+
+    public boolean wasAcked(){
+        return acked;
     }
 
     public void setData(byte[] data) throws Exception{
