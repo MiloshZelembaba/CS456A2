@@ -11,7 +11,7 @@ public class GoBackNSender {
     private int port;
     private InetAddress IPAddress;
     private byte[] data;
-    DatagramSocket clientSocket;
+    DatagramSocket senderSocket;
 
 
     public GoBackNSender(int timeout, byte[] data, String serverAddress, int port) throws Exception{
@@ -19,38 +19,63 @@ public class GoBackNSender {
         IPAddress= InetAddress.getByName(serverAddress);
         this.port = port;
         this.data = data;
-        clientSocket = new DatagramSocket();
+        senderSocket = new DatagramSocket();
+        senderSocket.setSoTimeout(10);
     }
 
 
 
 
     public void sendData() throws Exception{
-        // TODO some sort of timer
         int sequenceCounter = 0;
         int base = 0;
         int currentSendingPos = 0;
+        long startTime = 0;
+        DatagramPacket ackPacket;
         ArrayList<Packet> packets = new ArrayList<>(createAllPackets()); // not sure if i need to do it like this (with the copying)
 
-        while(true){
-//            if (sequenceCounter < base + WINDOW_SIZE && currentSendingPos < packets.size()){
-//                sendPacket(packets.get(currentSendingPos));
-//
-//                if (base == currentSendingPos){
-//                    // TODO start timer
-//                }
-//
-//                currentSendingPos++;
-//            }
 
-            if (currentSendingPos < packets.size()){
-                sendPacket(packets.get(currentSendingPos));
-                currentSendingPos++;
-            } else {
+        while(true){
+            if (base == packets.size()){
+                System.out.println("all packets have been sent, sending EOT");
                 break;
             }
 
+            if (sequenceCounter < base + WINDOW_SIZE && currentSendingPos < packets.size()){
+                sendPacket(packets.get(currentSendingPos));
 
+                if (base == currentSendingPos){
+                    System.out.println("started timer on base="+base);
+                    startTime = System.nanoTime();
+                }
+
+                currentSendingPos++;
+            }
+
+            byte[] receiveData = new byte[12];
+            ackPacket = new DatagramPacket(receiveData, receiveData.length); // will timeout after 10ms
+            try {
+                senderSocket.receive(ackPacket);
+                Packet packet = Packet.toPacket(ackPacket); // converts it to one of my packets i've defined
+                int ackNum = packet.getSequenceNumber();
+                System.out.println("JUST SAW... seq=" + ackNum);
+                // TODO: i think the below works, need to check
+                if (ackNum > base%256) {
+                    base += ((ackNum - base % 256) + 1);
+                } else {
+                    base += ((256 - (base % 256 - ackNum)) + 1);
+                }
+                System.out.println("started timer on(tryblock) base="+base);
+                startTime = System.nanoTime();
+            } catch (SocketException e){}
+
+            if (startTime/1000000 >= millisecondTimeout){
+                System.out.println("TIMEOUT... base="+base);
+                startTime = System.nanoTime();
+                for (int i=base; i<currentSendingPos; i++){
+                    sendPacket(packets.get(i));
+                }
+            }
 
         }
 
@@ -63,8 +88,8 @@ public class GoBackNSender {
         // do this at the end ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         Packet packet = createEOTPacket();
         DatagramPacket sendPacket = new DatagramPacket(packet.getBytes(), packet.getPacketLength(), IPAddress, port);
-        clientSocket.send(sendPacket);
-        clientSocket.close();
+        senderSocket.send(sendPacket);
+        senderSocket.close();
     }
 
     private ArrayList<Packet> createAllPackets() throws Exception{
@@ -90,7 +115,7 @@ public class GoBackNSender {
         byte[] bytes = packet.getBytes();
 
         DatagramPacket sendPacket = new DatagramPacket(bytes, packetLength, IPAddress, port);
-        clientSocket.send(sendPacket);
+        senderSocket.send(sendPacket);
     }
 
     private DataPacket createDataPacket(byte[] curData, int sequnceNumber) throws Exception{

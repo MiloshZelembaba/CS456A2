@@ -13,6 +13,8 @@ public class GoBackNReceiver {
     final static int MAX_PORT = 65535;
     private DatagramSocket serverSocket;
     private String filePath;
+    private int senderPort;
+    private InetAddress senderIPAddress;
 
     public GoBackNReceiver(String filePath) throws Exception{
         serverSocket = createUDPSocket(); // creates a UDP socket
@@ -27,19 +29,31 @@ public class GoBackNReceiver {
 
     public void receive() throws Exception{
         byte[] receiveData = new byte[512];
+        int expectedSequenceNumber = 0;
 
         DatagramPacket receivePacket;
         FileOutputStream fos = new FileOutputStream(filePath,true);
         while (true) {
-            String senderAddress;
-            int senderPort;
             receivePacket = new DatagramPacket(receiveData, receiveData.length);
             serverSocket.receive(receivePacket);
             Packet packet = Packet.toPacket(receivePacket); // converts it to one of my packets i've defined
+            senderPort = receivePacket.getPort();
+            senderIPAddress = receivePacket.getAddress();
+
 
             if (packet instanceof DataPacket) {
-                // write recvInfo for the channel
-                fos.write(((DataPacket) packet).getData());
+                if (packet.getSequenceNumber() == expectedSequenceNumber) {
+                    System.out.println("EXPECTED... seq=" + expectedSequenceNumber);
+                    // write recvInfo for the channel
+                    fos.write(((DataPacket) packet).getData());
+                    sendAck(expectedSequenceNumber);
+                    expectedSequenceNumber++;
+                    System.out.println("sending... seq=" + expectedSequenceNumber);
+                } else {
+                    System.out.println("UNEXPECTED... seq=" + packet.getSequenceNumber());
+                    sendAck(expectedSequenceNumber);
+                    System.out.println("sending... seq=" + expectedSequenceNumber);
+                }
             } else {
                 fos.close();
                 System.out.println("finished");
@@ -62,6 +76,17 @@ public class GoBackNReceiver {
         }
 
         return serverSocket;
+    }
+
+    public void sendAck(int ackNum){
+        Packet ackPack = new AcknowledgementPacket(ackNum);
+        int packetLength = ackPack.getPacketLength();
+        byte[] bytes = ackPack.getBytes();
+
+        DatagramPacket sendPacket = new DatagramPacket(bytes, packetLength, senderIPAddress, senderPort);
+        try {
+            serverSocket.send(sendPacket);
+        } catch (Exception e){}
     }
 
     public static DatagramSocket tryUDPOnPort(int port){
