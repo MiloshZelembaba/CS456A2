@@ -17,8 +17,8 @@ abstract public class AbstractReceiver {
 
     abstract public void receive() throws Exception;
 
-    protected EndOfTransferPacket createEOTPacket(){
-        EndOfTransferPacket packet = new EndOfTransferPacket();
+    protected EndOfTransferPacket createEOTPacket(int seqn){
+        EndOfTransferPacket packet = new EndOfTransferPacket(seqn);
 
         return packet;
     }
@@ -47,6 +47,7 @@ abstract public class AbstractReceiver {
         DatagramPacket sendPacket = new DatagramPacket(bytes, packetLength, senderIPAddress, senderPort);
         try {
             senderSocket.send(sendPacket);
+            System.out.println("PKT SEND ACK " + packetLength + " " + ackNum);
         } catch (Exception e){}
     }
 

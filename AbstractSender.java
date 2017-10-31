@@ -40,6 +40,7 @@ abstract public class AbstractSender {
         byte[] bytes = packet.getBytes();
 
         DatagramPacket sendPacket = new DatagramPacket(bytes, packetLength, IPAddress, port);
+        System.out.println("PKT SEND DAT " + packetLength + " " + packet.getSequenceNumber());
         senderSocket.send(sendPacket);
     }
 
@@ -50,8 +51,8 @@ abstract public class AbstractSender {
         return packet;
     }
 
-    protected EndOfTransferPacket createEOTPacket(){
-        EndOfTransferPacket packet = new EndOfTransferPacket();
+    protected EndOfTransferPacket createEOTPacket(int seqn){
+        EndOfTransferPacket packet = new EndOfTransferPacket(seqn);
 
         return packet;
     }

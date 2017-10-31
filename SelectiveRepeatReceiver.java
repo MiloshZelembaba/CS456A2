@@ -38,7 +38,7 @@ public class SelectiveRepeatReceiver extends AbstractReceiver{
 
             if (packet instanceof DataPacket) {
                 if (isIn(window, packet.getSequenceNumber())){
-                    System.out.println("IN BUFFER WINDOW... seq=" + packet.getSequenceNumber());
+//                    System.out.println("IN BUFFER WINDOW... seq=" + packet.getSequenceNumber());
                     windowBuffer.put(packet.getSequenceNumber(), (DataPacket)packet);
                     sendAck(packet.getSequenceNumber());
 
@@ -47,7 +47,7 @@ public class SelectiveRepeatReceiver extends AbstractReceiver{
                             if (windowBuffer.containsKey(window[i])) {
                                 DataPacket tmp = windowBuffer.get(window[i]);
                                 fos.write(tmp.getData()); // deliver data
-                                System.out.println("DELIVER... seq=" + window[i]);
+//                                System.out.println("DELIVER... seq=" + window[i]);
                                 base++;
                                 windowBuffer.remove(window[i]);
                             } else {
@@ -56,22 +56,23 @@ public class SelectiveRepeatReceiver extends AbstractReceiver{
                         }
                     }
                 } else if (isIn(recvWindow ,packet.getSequenceNumber())){
-                    System.out.println("IN RECEIVER WINDOW... seq=" + packet.getSequenceNumber());
+//                    System.out.println("IN RECEIVER WINDOW... seq=" + packet.getSequenceNumber());
                     sendAck(packet.getSequenceNumber());
                 } else {
-                    System.out.println("IGNORED... seq=" + packet.getSequenceNumber());
+//                    System.out.println("IGNORED... seq=" + packet.getSequenceNumber());
                 }
 
 
             } else { // EOT packet received
-                Packet eotPacket = createEOTPacket();
+                Packet eotPacket = createEOTPacket(base%256);
                 DatagramPacket sendPacket =
                         new DatagramPacket(eotPacket.getBytes(), eotPacket.getPacketLength(), senderIPAddress, senderPort);
                 senderSocket.send(sendPacket);
                 senderSocket.close();
+                System.out.println("PKT SEND EOT " + eotPacket.getPacketLength() + " " + eotPacket.getSequenceNumber());
 
                 fos.close();
-                System.out.println("finished");
+//                System.out.println("finished");
                 break;
             }
         }

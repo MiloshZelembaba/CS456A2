@@ -58,7 +58,7 @@ abstract public class Packet {
         } else if (pt == Packet.ACK){
             receivedPacket = new AcknowledgementPacket(seqn);
         } else { // treat anything else as an EOT, better for debugging?
-            receivedPacket = new EndOfTransferPacket();
+            receivedPacket = new EndOfTransferPacket(seqn);
         }
 
 

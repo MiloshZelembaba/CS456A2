@@ -35,25 +35,30 @@ public class GoBackNReceiver extends AbstractReceiver {
             if (packet instanceof DataPacket) {
                 if (packet.getSequenceNumber() == (expectedSequenceNumber + 1)%256) {
                     expectedSequenceNumber = (expectedSequenceNumber + 1)%256;
-                    System.out.println("EXPECTED... seq=" + expectedSequenceNumber);
+//                    System.out.println("EXPECTED... seq=" + expectedSequenceNumber);
                     // write recvInfo for the channel
                     fos.write(((DataPacket) packet).getData());
                     sendAck(expectedSequenceNumber);
-                    System.out.println("sending... seq=" + expectedSequenceNumber);
+//                    System.out.println("sending... seq=" + expectedSequenceNumber);
                 } else {
-                    System.out.println("UNEXPECTED... seq=" + packet.getSequenceNumber());
+//                    System.out.println("UNEXPECTED... seq=" + packet.getSequenceNumber());
                     sendAck(expectedSequenceNumber);
-                    System.out.println("sending... seq=" + expectedSequenceNumber);
+//                    System.out.println("sending... seq=" + expectedSequenceNumber);
                 }
             } else { // EOT packet received
-                Packet eotPacket = createEOTPacket();
+                System.out.println("PKT RECV EOT " + packet.getPacketLength() + " " + packet.getSequenceNumber());
+
+                Packet eotPacket = createEOTPacket((expectedSequenceNumber + 1)%256);
                 DatagramPacket sendPacket =
                         new DatagramPacket(eotPacket.getBytes(), eotPacket.getPacketLength(), senderIPAddress, senderPort);
                 senderSocket.send(sendPacket);
                 senderSocket.close();
+                System.out.println("PKT SEND EOT " + eotPacket.getPacketLength() + " " + eotPacket.getSequenceNumber());
+
+
 
                 fos.close();
-                System.out.println("finished");
+//                System.out.println("finished");
                 break;
             }
         }
