@@ -74,7 +74,7 @@ public class SelectiveRepeatSender extends AbstractSender{
             } catch (SocketTimeoutException e){}
 
             endTime = System.nanoTime();
-            Set<Integer> activeTimers= timers.keySet();
+            ArrayList<Integer> activeTimers= new ArrayList<>(timers.keySet());
             for (Integer t: activeTimers) {
                 if ((endTime - timers.get(t)) / 1000000 >= millisecondTimeout) {
 //                System.out.println("TIMEOUT... base="+base);
