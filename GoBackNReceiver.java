@@ -31,9 +31,10 @@ public class GoBackNReceiver {
         DatagramPacket receivePacket;
         FileOutputStream fos = new FileOutputStream(filePath,true);
         while (true) {
+            String senderAddress;
+            int senderPort;
             receivePacket = new DatagramPacket(receiveData, receiveData.length);
             serverSocket.receive(receivePacket);
-            System.out.println("datapacket received");
             Packet packet = Packet.toPacket(receivePacket); // converts it to one of my packets i've defined
 
             if (packet instanceof DataPacket) {
