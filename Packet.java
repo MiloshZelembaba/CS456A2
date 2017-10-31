@@ -15,7 +15,6 @@ abstract public class Packet {
 
     public static Packet toPacket(DatagramPacket packet){
         byte[] allBytes = packet.getData();
-        System.out.println(allBytes.length);
         int pt;
         int pl;
         int seqn;
