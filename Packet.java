@@ -47,8 +47,8 @@ abstract public class Packet {
         if (pt == Packet.DATA){
             receivedPacket = new DataPacket(seqn);
             buffer = ByteBuffer.allocate(pl);
-            for (int i=12; i<pl; i++){
-                System.out.println(i);
+            // TODO: THIS IS A BUG, USING pl-1 FOR NOW ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+            for (int i=12; i<pl-1; i++){
                 buffer.put(allBytes[i]);
             }
             try {

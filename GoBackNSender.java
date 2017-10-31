@@ -25,7 +25,6 @@ public class GoBackNSender {
 
         byte[] sendData;
 
-        // TODO, IMPLEMENT PROTOCOL, just testing rn
 
         Packet packet = createPacket(data);
         int packetLength = packet.getPacketLength();
