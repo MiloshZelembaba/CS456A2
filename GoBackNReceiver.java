@@ -42,12 +42,12 @@ public class GoBackNReceiver {
 
 
             if (packet instanceof DataPacket) {
-                if (packet.getSequenceNumber() == expectedSequenceNumber+1) {
-                    System.out.println("EXPECTED... seq=" + expectedSequenceNumber+1);
+                if (packet.getSequenceNumber() == (expectedSequenceNumber + 1)%256) {
+                    expectedSequenceNumber = (expectedSequenceNumber + 1)%256;
+                    System.out.println("EXPECTED... seq=" + expectedSequenceNumber);
                     // write recvInfo for the channel
                     fos.write(((DataPacket) packet).getData());
                     sendAck(expectedSequenceNumber);
-                    expectedSequenceNumber = (expectedSequenceNumber + 1)%256;
                     System.out.println("sending... seq=" + expectedSequenceNumber);
                 } else {
                     System.out.println("UNEXPECTED... seq=" + packet.getSequenceNumber());
