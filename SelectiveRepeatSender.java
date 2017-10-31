@@ -3,6 +3,9 @@ import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.SocketTimeoutException;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * Created by miloshzelembaba on 2017-10-30.
@@ -18,31 +21,28 @@ public class SelectiveRepeatSender extends AbstractSender{
         senderSocket.setSoTimeout(1);
     }
 
-    // TODO: createAllPackets() shouldn't create all at once
-
     public void sendData() throws Exception {
         int base = 0;
         int currentSendingPos = 0;
         long startTime = 0;
-        long endTime = 0;
+        long endTime;
         DatagramPacket ackPacket;
+        Map<Integer, Long> timers = new HashMap<>(); // this will keep track of all of the timers for each unacked packet in the window
         ArrayList<DataPacket> packets = new ArrayList<>(createAllPackets()); // not sure if i need to do it like this (with the copying)
 
 
         while(true){
-            if (base == packets.size()){
+            if (base == packets.size()){ // we reach this when all the packets have completed sending and been ack'ed
 //                System.out.println("all packets have been sent, sending EOT");
                 break;
             }
 
-            if (currentSendingPos < base + WINDOW_SIZE && currentSendingPos < packets.size()){
+            if (currentSendingPos < base + WINDOW_SIZE && currentSendingPos < packets.size()){ // send packets when we can
 //                System.out.println("SENT... seq=" + packets.get(currentSendingPos).getSequenceNumber());
                 sendPacket(packets.get(currentSendingPos));
 
-                if (base == currentSendingPos){
-//                    System.out.println("started timer on base="+base);
-                    startTime = System.nanoTime();
-                }
+                timers.put(packets.get(currentSendingPos).getSequenceNumber(),
+                            System.nanoTime()); // start the timer for packet
 
                 currentSendingPos++;
             }
@@ -58,6 +58,7 @@ public class SelectiveRepeatSender extends AbstractSender{
                 int[] windowNums = generateWindow(base);
                 if (isIn(windowNums, ackNum)) { // else ignore duplicate acks
                     packets.get(base + getPos(windowNums,ackNum)).ack();
+                    timers.remove(ackNum); // stop timer for the packet that received
 
                     if (getPos(windowNums,ackNum) == 0){ // we just acked the base, move slider
                         while (true){
@@ -67,23 +68,27 @@ public class SelectiveRepeatSender extends AbstractSender{
                             }
                             break;
                         }
-//                        System.out.println("started timer on(tryblock) base=" + base);
-                        startTime = System.nanoTime();
                     }
                 }
 
             } catch (SocketTimeoutException e){}
 
             endTime = System.nanoTime();
-            if ((endTime - startTime)/1000000 >= millisecondTimeout){
+            Set<Integer> activeTimers= timers.keySet();
+            for (Integer t: activeTimers) {
+                if ((endTime - timers.get(t)) / 1000000 >= millisecondTimeout) {
 //                System.out.println("TIMEOUT... base="+base);
-                startTime = System.nanoTime();
-                sendPacket(packets.get(base));
+                    timers.remove(t); // stop timer
+                    timers.put(t,System.nanoTime()); // start timer again
+
+                    sendPacket(packets.get(base + getPos(generateWindow(base), t)));
+                }
             }
 
         }
 
-        // do this at the end ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        // at this point we have sent all of the DataPackets and they have been successfully received/acknowledged
+        // so we send the EOT packet that we can assume will not be dropped
         Packet packet = createEOTPacket( base%256);
         DatagramPacket sendPacket = new DatagramPacket(packet.getBytes(), packet.getPacketLength(), IPAddress, port);
         senderSocket.send(sendPacket);

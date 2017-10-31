@@ -29,7 +29,7 @@ public class GoBackNSender extends AbstractSender{
 
 
         while(true){
-            if (base == packets.size()){ // we reach this when all the packets have completed sending
+            if (base == packets.size()){ // we reach this when all the packets have completed sending and been ack'ed
 //                System.out.println("all packets have been sent, sending EOT");
                 break;
             }
