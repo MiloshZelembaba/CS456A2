@@ -30,6 +30,7 @@ public class GoBackNReceiver {
     public void receive() throws Exception{
         byte[] receiveData = new byte[512];
         int expectedSequenceNumber = 0;
+        int lastReceived = -1;
 
         DatagramPacket receivePacket;
         FileOutputStream fos = new FileOutputStream(filePath,true);
@@ -47,12 +48,13 @@ public class GoBackNReceiver {
                     // write recvInfo for the channel
                     fos.write(((DataPacket) packet).getData());
                     sendAck(expectedSequenceNumber);
+                    lastReceived = expectedSequenceNumber;
                     expectedSequenceNumber = (expectedSequenceNumber + 1)%256;
                     System.out.println("sending... seq=" + expectedSequenceNumber);
                 } else {
                     System.out.println("UNEXPECTED... seq=" + packet.getSequenceNumber());
                     sendAck(expectedSequenceNumber);
-                    System.out.println("sending... seq=" + expectedSequenceNumber);
+                    System.out.println("sending... seq=" + lastReceived);
                 }
             } else {
                 fos.close();
