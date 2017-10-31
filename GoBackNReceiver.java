@@ -47,7 +47,7 @@ public class GoBackNReceiver {
                     // write recvInfo for the channel
                     fos.write(((DataPacket) packet).getData());
                     sendAck(expectedSequenceNumber);
-                    expectedSequenceNumber++;
+                    expectedSequenceNumber = (expectedSequenceNumber + 1)%256;
                     System.out.println("sending... seq=" + expectedSequenceNumber);
                 } else {
                     System.out.println("UNEXPECTED... seq=" + packet.getSequenceNumber());

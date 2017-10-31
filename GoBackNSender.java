@@ -60,7 +60,7 @@ public class GoBackNSender {
                 int ackNum = packet.getSequenceNumber();
                 System.out.println("JUST SAW... seq=" + ackNum);
                 // TODO: i think the below works, need to check
-                if (ackNum > base%256) {
+                if (ackNum >= base%256) {
                     base += ((ackNum - base % 256) + 1);
                 } else {
                     base += ((256 - (base % 256 - ackNum)) + 1);
