@@ -43,6 +43,7 @@ public class GoBackNSender {
             }
 
             if (sequenceCounter < base + WINDOW_SIZE && currentSendingPos < packets.size()){
+                System.out.println("jSENT... seq=" + packets.get(currentSendingPos).getSequenceNumber());
                 sendPacket(packets.get(currentSendingPos));
 
                 if (base == currentSendingPos){
