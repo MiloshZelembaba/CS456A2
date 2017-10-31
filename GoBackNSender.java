@@ -25,9 +25,9 @@ public class GoBackNSender {
         DatagramSocket clientSocket = new DatagramSocket();
 
         for (int i=0; i<data.length; i+=500){
+            System.out.println(i);
             ByteBuffer buffer = ByteBuffer.allocate(Math.min(500, data.length - i));
             for (int j=i; j<Math.min(500, data.length - i); j++){
-                System.out.println(j);
                 buffer.put(data[j-i]);
             }
             Packet packet = createDataPacket(buffer.array());
