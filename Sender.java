@@ -27,7 +27,11 @@ public class Sender {
             GoBackNSender sender = new GoBackNSender(millisecondTimeout, dataToSend, serverAddress, port);
             sender.sendData();
         } else if (protocol == SELECTIVE_REPEAT){
+            Path path = Paths.get(filePath);
+            byte[] dataToSend = Files.readAllBytes(path);
 
+            SelectiveRepeatSender sender = new SelectiveRepeatSender(millisecondTimeout, dataToSend, serverAddress, port);
+            sender.sendData();
         } else {
             throw new Exception("Incorrect protocol selected");
         }

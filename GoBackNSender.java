@@ -1,19 +1,10 @@
 import java.net.*;
-import java.nio.ByteBuffer;
 import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Created by miloshzelembaba on 2017-10-30.
  */
-public class GoBackNSender {
-    private final int WINDOW_SIZE = 10;
-    private int millisecondTimeout;
-    private int port;
-    private InetAddress IPAddress;
-    private byte[] data;
-    DatagramSocket senderSocket;
-
+public class GoBackNSender extends AbstractSender{
 
     public GoBackNSender(int timeout, byte[] data, String serverAddress, int port) throws Exception{
         millisecondTimeout = timeout;
@@ -24,17 +15,14 @@ public class GoBackNSender {
         senderSocket.setSoTimeout(1);
     }
 
-
-
-
-    public void sendData() throws Exception{
+    public void sendData() throws Exception {
         int sequenceCounter = 0;
         int base = 0;
         int currentSendingPos = 0;
         long startTime = 0;
-        long endTime = 0;
+        long endTime;
         DatagramPacket ackPacket;
-        ArrayList<Packet> packets = new ArrayList<>(createAllPackets()); // not sure if i need to do it like this (with the copying)
+        ArrayList<DataPacket> packets = new ArrayList<>(createAllPackets()); // not sure if i need to do it like this (with the copying)
 
 
         while(true){
@@ -43,7 +31,7 @@ public class GoBackNSender {
                 break;
             }
 
-            if (sequenceCounter < base + WINDOW_SIZE && currentSendingPos < packets.size()){
+            if (currentSendingPos < base + WINDOW_SIZE && currentSendingPos < packets.size()){
                 System.out.println("SENT... seq=" + packets.get(currentSendingPos).getSequenceNumber());
                 sendPacket(packets.get(currentSendingPos));
 
@@ -100,74 +88,5 @@ public class GoBackNSender {
 
 
         senderSocket.close();
-    }
-
-    private int[] generateWindow(int base){
-        int[] result = new int[10];
-
-        for (int i=0; i<WINDOW_SIZE; i++){
-            result[i] = (base + i)%256;
-        }
-
-        return result;
-    }
-
-    private int getPos(int[] windowSlider, int num){
-        for (int i=0; i<WINDOW_SIZE; i++){
-            if (windowSlider[i] == num){
-                return i;
-            }
-        }
-
-        return -1;
-    }
-
-    private boolean isIn(int[] windowSlider, int num){
-        for (int i=0; i<WINDOW_SIZE; i++){
-            if (windowSlider[i] == num){
-                return true;
-            }
-        }
-
-        return false;
-    }
-
-    private ArrayList<Packet> createAllPackets() throws Exception{
-        int sequenceCounter = 0;
-        ArrayList<Packet> packets = new ArrayList<>();
-        for (int i = 0; i < data.length; i += 500) {
-            ByteBuffer buffer = ByteBuffer.allocate(Math.min(500, data.length - i));
-            for (int j = 0; j < Math.min(500, data.length - i); j++) {
-                buffer.put(data[i + j]);
-            }
-            Packet packet = createDataPacket(buffer.array(), sequenceCounter);
-            packets.add(packet);
-
-            sequenceCounter = (sequenceCounter + 1) % 256;
-            buffer.clear();
-        }
-
-        return packets;
-    }
-
-    private void sendPacket(Packet packet) throws Exception{
-        int packetLength = packet.getPacketLength();
-        byte[] bytes = packet.getBytes();
-
-        DatagramPacket sendPacket = new DatagramPacket(bytes, packetLength, IPAddress, port);
-        senderSocket.send(sendPacket);
-    }
-
-    private DataPacket createDataPacket(byte[] curData, int sequnceNumber) throws Exception{
-        DataPacket packet = new DataPacket(sequnceNumber);
-        packet.setData(curData);
-
-        return packet;
-    }
-
-    private EndOfTransferPacket createEOTPacket(){
-        EndOfTransferPacket packet = new EndOfTransferPacket();
-
-        return packet;
     }
 }

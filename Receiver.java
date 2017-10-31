@@ -15,7 +15,8 @@ public class Receiver {
             GoBackNReceiver receiver = new GoBackNReceiver(filePath);
             receiver.receive();
         } else if (protocol == SELECTIVE_REPEAT){
-
+            SelectiveRepeatReceiver receiver = new SelectiveRepeatReceiver(filePath);
+            receiver.receive();
         } else {
             throw new Exception("Incorrect protocol selected");
         }
