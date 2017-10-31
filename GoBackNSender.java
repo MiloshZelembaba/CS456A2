@@ -45,6 +45,7 @@ public class GoBackNSender {
 
             if (currentSendingPos < packets.size()){
                 sendPacket(packets.get(currentSendingPos));
+                currentSendingPos++;
             } else {
                 break;
             }
