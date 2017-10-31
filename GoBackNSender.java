@@ -26,14 +26,16 @@ public class GoBackNSender {
 
         for (int i=0; i<data.length; i+=500){
             ByteBuffer buffer = ByteBuffer.allocate(Math.min(500, data.length - i));
+            System.out.println(Math.min(500, data.length - i));
             for (int j=0; j<Math.min(500, data.length - i); j++){
                 buffer.put(data[j]);
             }
             Packet packet = createDataPacket(buffer.array());
             int packetLength = packet.getPacketLength();
             byte[] bytes = packet.getBytes();
-            String text = new String(buffer.array(), "UTF-8");
+            String text = new String(bytes, "UTF-8");
             char[] chars = text.toCharArray();
+            System.out.println(chars);
 
             DatagramPacket sendPacket = new DatagramPacket(bytes, packetLength, IPAddress, port);
             clientSocket.send(sendPacket);
