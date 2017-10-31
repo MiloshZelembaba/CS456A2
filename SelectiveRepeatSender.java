@@ -21,10 +21,14 @@ public class SelectiveRepeatSender extends AbstractSender{
         senderSocket.setSoTimeout(1);
     }
 
+    /**
+     * This is where all of the sending logic for SR is coded.
+     * Sends data according to the SR protocol
+     * @throws Exception
+     */
     public void sendData() throws Exception {
         int base = 0;
         int currentSendingPos = 0;
-        long startTime = 0;
         long endTime;
         DatagramPacket ackPacket;
         Map<Integer, Long> timers = new HashMap<>(); // this will keep track of all of the timers for each unacked packet in the window
@@ -42,13 +46,13 @@ public class SelectiveRepeatSender extends AbstractSender{
                 sendPacket(packets.get(currentSendingPos));
 
                 timers.put(packets.get(currentSendingPos).getSequenceNumber(),
-                            System.nanoTime()); // start the timer for packet
+                            System.nanoTime()); // start the timer for that packet
 
                 currentSendingPos++;
             }
 
             byte[] receiveData = new byte[12];
-            ackPacket = new DatagramPacket(receiveData, receiveData.length); // will timeout after 10ms
+            ackPacket = new DatagramPacket(receiveData, receiveData.length); // will timeout after 1ms
             try {
                 senderSocket.receive(ackPacket);
                 Packet packet = Packet.toPacket(ackPacket); // converts it to one of my packets i've defined
