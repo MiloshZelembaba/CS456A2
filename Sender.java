@@ -20,16 +20,14 @@ public class Sender {
         String serverAddress = channelInfo.split(" ")[0];
         int port = Integer.parseInt(channelInfo.split(" ")[1]);
 
-        if (protocol == GO_BACK_N){
-            Path path = Paths.get(filePath);
-            byte[] dataToSend = Files.readAllBytes(path);
+        // get the file to send
+        Path path = Paths.get(filePath);
+        byte[] dataToSend = Files.readAllBytes(path);
 
+        if (protocol == GO_BACK_N){
             GoBackNSender sender = new GoBackNSender(millisecondTimeout, dataToSend, serverAddress, port);
             sender.sendData();
         } else if (protocol == SELECTIVE_REPEAT){
-            Path path = Paths.get(filePath);
-            byte[] dataToSend = Files.readAllBytes(path);
-
             SelectiveRepeatSender sender = new SelectiveRepeatSender(millisecondTimeout, dataToSend, serverAddress, port);
             sender.sendData();
         } else {

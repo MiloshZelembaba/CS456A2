@@ -15,14 +15,21 @@ abstract public class AbstractReceiver {
     protected int senderPort;
     protected InetAddress senderIPAddress;
 
+    // implemented by the respective protocol
     abstract public void receive() throws Exception;
 
+    /**
+     * Creates an EOTPacket
+     */
     protected EndOfTransferPacket createEOTPacket(int seqn){
         EndOfTransferPacket packet = new EndOfTransferPacket(seqn);
 
         return packet;
     }
 
+    /**
+     * Opens up a UDPSocket
+     */
     protected static DatagramSocket createUDPSocket(){
         int n_port;
         DatagramSocket serverSocket;
@@ -39,6 +46,9 @@ abstract public class AbstractReceiver {
         return serverSocket;
     }
 
+    /**
+     * Sends an AckPacket with ackNum to the sender
+     */
     protected void sendAck(int ackNum){
         Packet ackPack = new AcknowledgementPacket(ackNum);
         int packetLength = ackPack.getPacketLength();
@@ -51,6 +61,9 @@ abstract public class AbstractReceiver {
         } catch (Exception e){}
     }
 
+    /**
+     * Tries opening a UDPSocket on port
+     */
     protected static DatagramSocket tryUDPOnPort(int port){
         DatagramSocket ds;
         try {
@@ -62,11 +75,17 @@ abstract public class AbstractReceiver {
         return null;
     }
 
+    /**
+     * Generates a random port number
+     */
     protected static int generatePortNumber(){
         Random rand = new Random();
         return rand.nextInt(MAX_PORT - 1023) + 1024;
     }
 
+    /**
+     * Generates a window
+     */
     protected int[] generateWindow(int base){
         int[] result = new int[10];
 
@@ -77,6 +96,9 @@ abstract public class AbstractReceiver {
         return result;
     }
 
+    /**
+     * Generates a reciever window
+     */
     protected int[] generateRecvWindow(int base){
         int[] result = new int[10];
 
@@ -87,6 +109,9 @@ abstract public class AbstractReceiver {
         return result;
     }
 
+    /**
+     * returns the position of num in windowSlider
+     */
     protected int getPos(int[] windowSlider, int num){
         for (int i=0; i<WINDOW_SIZE; i++){
             if (windowSlider[i] == num){
@@ -97,6 +122,9 @@ abstract public class AbstractReceiver {
         return -1;
     }
 
+    /**
+     * returns true if num in windowSlider
+     */
     protected boolean isIn(int[] windowSlider, int num){
         for (int i=0; i<WINDOW_SIZE; i++){
             if (windowSlider[i] == num){

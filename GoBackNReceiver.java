@@ -18,6 +18,11 @@ public class GoBackNReceiver extends AbstractReceiver {
         fileWriter.close();
     }
 
+    /**
+     * This is where all of the logic behind GBN recieve is coded.
+     * Receives data according to the GBN protocol
+     * @throws Exception
+     */
     public void receive() throws Exception{
         byte[] receiveData = new byte[512];
         int expectedSequenceNumber = -1;
@@ -33,21 +38,28 @@ public class GoBackNReceiver extends AbstractReceiver {
 
 
             if (packet instanceof DataPacket) {
-                if (packet.getSequenceNumber() == (expectedSequenceNumber + 1)%256) {
-                    expectedSequenceNumber = (expectedSequenceNumber + 1)%256;
+                System.out.println("PKT RECV DATA " + packet.getPacketLength() + " " + packet.getSequenceNumber());
+                if (packet.getSequenceNumber() == (expectedSequenceNumber + 1)%256) { // the seq number we're expecting to see
+                    expectedSequenceNumber = (expectedSequenceNumber + 1)%256; // we saw it so increase
 //                    System.out.println("EXPECTED... seq=" + expectedSequenceNumber);
                     // write recvInfo for the channel
-                    fos.write(((DataPacket) packet).getData());
-                    sendAck(expectedSequenceNumber);
+                    fos.write(((DataPacket) packet).getData()); // Deliver the data (a.k.a write the bytes to file)
+                    sendAck(expectedSequenceNumber); // send ack to sender
 //                    System.out.println("sending... seq=" + expectedSequenceNumber);
                 } else {
 //                    System.out.println("UNEXPECTED... seq=" + packet.getSequenceNumber());
-                    sendAck(expectedSequenceNumber);
+                    // this is for the case the FIRST package doesn't arrive
+                    // according to a piazza post we don't want to send any sort of ack, before i was sending
+                    // and ack of -1
+                    if (expectedSequenceNumber != -1) {
+                        sendAck(expectedSequenceNumber);
+                    }
 //                    System.out.println("sending... seq=" + expectedSequenceNumber);
                 }
             } else { // EOT packet received
                 System.out.println("PKT RECV EOT " + packet.getPacketLength() + " " + packet.getSequenceNumber());
 
+                // send back EOT to the sender
                 Packet eotPacket = createEOTPacket((expectedSequenceNumber + 1)%256);
                 DatagramPacket sendPacket =
                         new DatagramPacket(eotPacket.getBytes(), eotPacket.getPacketLength(), senderIPAddress, senderPort);
@@ -58,7 +70,6 @@ public class GoBackNReceiver extends AbstractReceiver {
 
 
                 fos.close();
-//                System.out.println("finished");
                 break;
             }
         }

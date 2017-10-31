@@ -31,7 +31,7 @@ public class SelectiveRepeatSender extends AbstractSender{
 
         while(true){
             if (base == packets.size()){
-                System.out.println("all packets have been sent, sending EOT");
+//                System.out.println("all packets have been sent, sending EOT");
                 break;
             }
 
@@ -54,6 +54,7 @@ public class SelectiveRepeatSender extends AbstractSender{
                 Packet packet = Packet.toPacket(ackPacket); // converts it to one of my packets i've defined
                 int ackNum = packet.getSequenceNumber();
 //                System.out.println("JUST SAW... seq=" + ackNum);
+                System.out.println("PKT RECV ACK " + packet.getPacketLength() + " " + packet.getSequenceNumber());
                 int[] windowNums = generateWindow(base);
                 if (isIn(windowNums, ackNum)) { // else ignore duplicate acks
                     packets.get(base + getPos(windowNums,ackNum)).ack();

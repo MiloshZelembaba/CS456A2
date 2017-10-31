@@ -4,6 +4,8 @@ import java.nio.ByteOrder;
 
 /**
  * Created by miloshzelembaba on 2017-10-30.
+ *
+ * Abstract packet class. This is whats sent over the network between the sender & reciever
  */
 abstract public class Packet {
     public static final int DATA = 0;
@@ -13,6 +15,10 @@ abstract public class Packet {
     protected byte[] packetLength = toArray(12);
     protected byte[] sequenceNumber;
 
+
+    /**
+     * Converts a DatagramPacket to a Packet
+     */
     public static Packet toPacket(DatagramPacket packet){
         byte[] allBytes = packet.getData();
         int pt;
@@ -44,6 +50,7 @@ abstract public class Packet {
 //        System.out.println("packetSequence: " + seqn);
 
         Packet receivedPacket;
+        // create the packet
         if (pt == Packet.DATA){
             receivedPacket = new DataPacket(seqn);
             buffer = ByteBuffer.allocate(pl - 12);
@@ -65,6 +72,9 @@ abstract public class Packet {
         return receivedPacket;
     }
 
+    /**
+     * converts the packet into a byte array
+     */
     public byte[] getBytes(){
         ByteBuffer buffer = ByteBuffer.allocate(fromArray(packetLength));
         buffer.put(packetType);
@@ -73,6 +83,9 @@ abstract public class Packet {
         return buffer.array();
     }
 
+    /**
+     * converts an integer value into 32-bit unsigned Big Endian
+     */
     protected static byte[] toArray(int value){
         ByteBuffer buffer = ByteBuffer.allocate(4);
         buffer.order(ByteOrder.BIG_ENDIAN);
@@ -81,6 +94,9 @@ abstract public class Packet {
         return buffer.array();
     }
 
+    /**
+     * converts a 32-bit unsigned Big Endian to an integer
+     */
     protected static int fromArray(byte[] payload){
         ByteBuffer buffer = ByteBuffer.wrap(payload);
         buffer.order(ByteOrder.BIG_ENDIAN);

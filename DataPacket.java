@@ -22,14 +22,23 @@ public class DataPacket extends Packet {
         return buffer.array();
     }
 
+    /**
+     * Acks a packet
+     */
     public void ack(){
         acked = true;
     }
 
+    /**
+     * returns if the packet was acked
+     */
     public boolean wasAcked(){
         return acked;
     }
 
+    /**
+     * sets the data to be transfered with the packet
+     */
     public void setData(byte[] data) throws Exception{
         int dataLength = data.length;
         if (dataLength > 500){

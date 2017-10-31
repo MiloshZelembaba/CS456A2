@@ -37,6 +37,7 @@ public class SelectiveRepeatReceiver extends AbstractReceiver{
             int[] recvWindow = generateRecvWindow(base);
 
             if (packet instanceof DataPacket) {
+                System.out.println("PKT RECV DATA " + packet.getPacketLength() + " " + packet.getSequenceNumber());
                 if (isIn(window, packet.getSequenceNumber())){
 //                    System.out.println("IN BUFFER WINDOW... seq=" + packet.getSequenceNumber());
                     windowBuffer.put(packet.getSequenceNumber(), (DataPacket)packet);
@@ -64,6 +65,8 @@ public class SelectiveRepeatReceiver extends AbstractReceiver{
 
 
             } else { // EOT packet received
+                System.out.println("PKT RECV EOT " + packet.getPacketLength() + " " + packet.getSequenceNumber());
+
                 Packet eotPacket = createEOTPacket(base%256);
                 DatagramPacket sendPacket =
                         new DatagramPacket(eotPacket.getBytes(), eotPacket.getPacketLength(), senderIPAddress, senderPort);
