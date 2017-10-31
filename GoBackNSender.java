@@ -5,6 +5,7 @@ import java.nio.ByteBuffer;
  * Created by miloshzelembaba on 2017-10-30.
  */
 public class GoBackNSender {
+    private final int WINDOW_SIZE = 10;
     private int millisecondTimeout;
     private int port;
     private InetAddress IPAddress;
@@ -22,24 +23,22 @@ public class GoBackNSender {
 
 
     public void sendData() throws Exception{
+        int sequenceCounter = 0;
         DatagramSocket clientSocket = new DatagramSocket();
 
         for (int i=0; i<data.length; i+=500){
             ByteBuffer buffer = ByteBuffer.allocate(Math.min(500, data.length - i));
-            System.out.println(Math.min(500, data.length - i));
             for (int j=0; j<Math.min(500, data.length - i); j++){
                 buffer.put(data[i+j]);
             }
-            Packet packet = createDataPacket(buffer.array());
+            Packet packet = createDataPacket(buffer.array(), sequenceCounter);
             int packetLength = packet.getPacketLength();
             byte[] bytes = packet.getBytes();
-            String text = new String(bytes, "UTF-8");
-            char[] chars = text.toCharArray();
-            System.out.println(chars);
 
             DatagramPacket sendPacket = new DatagramPacket(bytes, packetLength, IPAddress, port);
             clientSocket.send(sendPacket);
 
+            sequenceCounter = (sequenceCounter + 1)%256;
             buffer.clear();
         }
 
@@ -50,8 +49,8 @@ public class GoBackNSender {
         clientSocket.close();
     }
 
-    private DataPacket createDataPacket(byte[] curData) throws Exception{
-        DataPacket packet = new DataPacket(100);
+    private DataPacket createDataPacket(byte[] curData, int sequnceNumber) throws Exception{
+        DataPacket packet = new DataPacket(sequnceNumber);
         packet.setData(curData);
 
         return packet;
