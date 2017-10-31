@@ -79,8 +79,8 @@ abstract public class AbstractReceiver {
     protected int[] generateRecvWindow(int base){
         int[] result = new int[10];
 
-        for (int i=base-WINDOW_SIZE; i<base-1; i++){
-            result[i] = (i)%256;
+        for (int i=0; i<WINDOW_SIZE; i++){
+            result[i] = (base - WINDOW_SIZE + i)%256;
         }
 
         return result;
