@@ -1,6 +1,7 @@
 import java.net.*;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by miloshzelembaba on 2017-10-30.
@@ -32,7 +33,6 @@ public class GoBackNSender {
         int currentSendingPos = 0;
         long startTime = 0;
         long endTime = 0;
-        int lastSaw = -1;
         DatagramPacket ackPacket;
         ArrayList<Packet> packets = new ArrayList<>(createAllPackets()); // not sure if i need to do it like this (with the copying)
 
@@ -63,13 +63,14 @@ public class GoBackNSender {
                 int ackNum = packet.getSequenceNumber();
                 System.out.println("JUST SAW... seq=" + ackNum);
                 // TODO: i think the below works, need to check
-                if (ackNum > lastSaw) {
-                    lastSaw = ackNum;
-                    if (ackNum >= base % 256) {
-                        base += ((ackNum - base % 256) + 1);
-                    } else {
-                        base += ((256 - (base % 256 - ackNum)) + 1);
-                    }
+                int[] windowNums = generateWindow(base);
+                if (isIn(windowNums, ackNum)) { // else ignore duplicate acks
+                    base += getPos(windowNums,ackNum) + 1;
+//                    if (ackNum >= base % 256) {
+//                        base += ((ackNum - base % 256) + 1);
+//                    } else {
+//                        base += ((256 - (base % 256 - ackNum)) + 1);
+//                    }
                     System.out.println("started timer on(tryblock) base=" + base);
                     startTime = System.nanoTime();
                 }
@@ -98,6 +99,36 @@ public class GoBackNSender {
         DatagramPacket sendPacket = new DatagramPacket(packet.getBytes(), packet.getPacketLength(), IPAddress, port);
         senderSocket.send(sendPacket);
         senderSocket.close();
+    }
+
+    private int[] generateWindow(int base){
+        int[] result = new int[10];
+
+        for (int i=0; i<WINDOW_SIZE; i++){
+            result[i] = (base + i)%256;
+        }
+
+        return result;
+    }
+
+    private int getPos(int[] windowSlider, int num){
+        for (int i=0; i<WINDOW_SIZE; i++){
+            if (windowSlider[i] == num){
+                return i;
+            }
+        }
+
+        return -1;
+    }
+
+    private boolean isIn(int[] windowSlider, int num){
+        for (int i=0; i<WINDOW_SIZE; i++){
+            if (windowSlider[i] == num){
+                return true;
+            }
+        }
+
+        return false;
     }
 
     private ArrayList<Packet> createAllPackets() throws Exception{
