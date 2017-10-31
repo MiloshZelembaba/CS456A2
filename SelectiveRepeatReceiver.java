@@ -47,6 +47,7 @@ public class SelectiveRepeatReceiver extends AbstractReceiver{
                             if (windowBuffer.containsKey(window[i])) {
                                 DataPacket tmp = windowBuffer.get(window[i]);
                                 fos.write(tmp.getData()); // deliver data
+                                System.out.println("DELIVER... seq=" + window[i]);
                                 base++;
                                 windowBuffer.remove(window[i]);
                             } else {
