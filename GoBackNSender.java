@@ -67,7 +67,7 @@ public class GoBackNSender {
                 }
                 System.out.println("started timer on(tryblock) base="+base);
                 startTime = System.nanoTime();
-            } catch (SocketException e){}
+            } catch (SocketTimeoutException e){}
 
             if (startTime/1000000 >= millisecondTimeout){
                 System.out.println("TIMEOUT... base="+base);
