@@ -15,6 +15,7 @@ abstract public class Packet {
 
     public static Packet toPacket(DatagramPacket packet){
         byte[] allBytes = packet.getData();
+        System.out.println(allBytes.length);
         int pt;
         int pl;
         int seqn;
@@ -46,7 +47,7 @@ abstract public class Packet {
         Packet receivedPacket;
         if (pt == Packet.DATA){
             receivedPacket = new DataPacket(seqn);
-            buffer = ByteBuffer.allocate(pl);
+            buffer = ByteBuffer.allocate(pl - 12);
             for (int i=12; i<pl; i++){
                 buffer.put(allBytes[i]);
             }

@@ -32,10 +32,10 @@ public class GoBackNReceiver {
         while (true) {
             receivePacket = new DatagramPacket(receiveData, receiveData.length);
             serverSocket.receive(receivePacket);
+            System.out.println("datapacket received");
             Packet packet = Packet.toPacket(receivePacket); // converts it to one of my packets i've defined
 
             if (packet instanceof DataPacket) {
-                System.out.println("datapacket received");
                 // write recvInfo for the channel
                 fos.write(((DataPacket) packet).getData());
             } else {
