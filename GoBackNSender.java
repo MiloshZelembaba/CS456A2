@@ -32,7 +32,9 @@ public class GoBackNSender {
             Packet packet = createDataPacket(buffer.array());
             int packetLength = packet.getPacketLength();
             byte[] bytes = packet.getBytes();
-            System.out.println(bytes);
+            String text = new String(bytes, "UTF-8");
+            char[] chars = text.toCharArray();
+            System.out.println(chars);
 
             DatagramPacket sendPacket = new DatagramPacket(bytes, packetLength, IPAddress, port);
             clientSocket.send(sendPacket);
