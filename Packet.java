@@ -25,7 +25,7 @@ abstract public class Packet {
         }
         pt = fromArray(buffer.array());
         buffer.clear();
-        System.out.println("packetType: " + pt);
+//        System.out.println("packetType: " + pt);
 
         buffer = ByteBuffer.allocate(4);
         for (int i=4; i<8; i++){ // extract the packetLength
@@ -33,7 +33,7 @@ abstract public class Packet {
         }
         pl = fromArray(buffer.array());
         buffer.clear();
-        System.out.println("packetLength: " + pl);
+//        System.out.println("packetLength: " + pl);
 
         buffer = ByteBuffer.allocate(4);
         for (int i=8; i<12; i++){ // extract the seqN
@@ -41,7 +41,7 @@ abstract public class Packet {
         }
         seqn = fromArray(buffer.array());
         buffer.clear();
-        System.out.println("packetSequence: " + seqn);
+//        System.out.println("packetSequence: " + seqn);
 
         Packet receivedPacket;
         if (pt == Packet.DATA){
