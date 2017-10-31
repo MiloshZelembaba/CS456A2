@@ -39,7 +39,7 @@ public class GoBackNSender {
 
     public DataPacket createPacket(byte[] curData) throws Exception{
         DataPacket packet = new DataPacket(100);
-        packet.setdata(curData);
+        packet.setData(curData);
 
         return packet;
     }

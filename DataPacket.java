@@ -7,7 +7,7 @@ public class DataPacket extends Packet {
     private byte[] data;
 
     public DataPacket(int seqn){
-        packetType = toArray(0); // number for a data packet
+        packetType = toArray(Packet.DATA); // number for a data packet
         sequenceNumber = toArray(seqn);
     }
 
@@ -17,11 +17,10 @@ public class DataPacket extends Packet {
         buffer.put(packetLength);
         buffer.put(sequenceNumber);
         buffer.put(data);
-        System.out.println("THE DATAPACKET VERSION OF GETBYTES CALLED!");
         return buffer.array();
     }
 
-    public void setdata(byte[] data) throws Exception{
+    public void setData(byte[] data) throws Exception{
         int dataLength = data.length;
         if (dataLength > 500){
             throw new Exception("Data exceeds 500 bytes, cannot add to packet");

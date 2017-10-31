@@ -1,3 +1,4 @@
+import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.net.DatagramPacket;
@@ -11,9 +12,11 @@ import java.util.Random;
 public class GoBackNReceiver {
     final static int MAX_PORT = 65535;
     private DatagramSocket serverSocket;
+    private String filePath;
 
-    public GoBackNReceiver() throws Exception{
+    public GoBackNReceiver(String filePath) throws Exception{
         serverSocket = createUDPSocket(); // creates a UDP socket
+        this.filePath = filePath;
 
         // write recvInfo for the channel
         FileWriter fileWriter = new FileWriter("recvInfo");
@@ -28,8 +31,15 @@ public class GoBackNReceiver {
         while (true) {
             receivePacket = new DatagramPacket(receiveData, receiveData.length);
             serverSocket.receive(receivePacket);
+            Packet packet = Packet.toPacket(receivePacket); // converts it to one of my packets i've defined
 
-            System.out.println(receiveData);
+            // write recvInfo for the channel
+            FileOutputStream fos = new FileOutputStream(filePath);
+            fos.write(((DataPacket)packet).getData());
+            fos.close();
+
+
+            System.out.println("finished");
             break;
         }
     }

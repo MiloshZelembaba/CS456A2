@@ -4,7 +4,7 @@
 public class EndOfTransferPacket extends Packet{
 
     public EndOfTransferPacket(){
-        packetType = toArray(2); // number for an acknowledgement packet
+        packetType = toArray(Packet.EOT); // number for an acknowledgement packet
         sequenceNumber = toArray(-1);
     }
 }

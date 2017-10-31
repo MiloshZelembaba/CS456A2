@@ -4,7 +4,7 @@
 public class AcknowledgementPacket extends Packet{
 
     public AcknowledgementPacket(int seqn){
-        packetType = toArray(1); // number for an acknowledgement packet
+        packetType = toArray(Packet.ACK); // number for an acknowledgement packet
         sequenceNumber = toArray(seqn);
     }
 }

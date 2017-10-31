@@ -12,7 +12,7 @@ public class Receiver {
         String filePath = args[1];
 
         if (protocol == GO_BACK_N){
-            GoBackNReceiver receiver = new GoBackNReceiver();
+            GoBackNReceiver receiver = new GoBackNReceiver(filePath);
             receiver.receive();
         } else if (protocol == SELECTIVE_REPEAT){
 
