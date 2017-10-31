@@ -31,6 +31,7 @@ public class GoBackNSender {
         int base = 0;
         int currentSendingPos = 0;
         long startTime = 0;
+        long endTime = 0;
         DatagramPacket ackPacket;
         ArrayList<Packet> packets = new ArrayList<>(createAllPackets()); // not sure if i need to do it like this (with the copying)
 
@@ -69,7 +70,8 @@ public class GoBackNSender {
                 startTime = System.nanoTime();
             } catch (SocketTimeoutException e){}
 
-            if (startTime/1000000 >= millisecondTimeout){
+            endTime = System.nanoTime();
+            if ((endTime - startTime)/1000000 >= millisecondTimeout){
                 System.out.println("TIMEOUT... base="+base);
                 startTime = System.nanoTime();
                 for (int i=base; i<currentSendingPos; i++){
