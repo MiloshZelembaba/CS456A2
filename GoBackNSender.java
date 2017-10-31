@@ -20,7 +20,7 @@ public class GoBackNSender {
         this.port = port;
         this.data = data;
         senderSocket = new DatagramSocket();
-        senderSocket.setSoTimeout(10);
+        senderSocket.setSoTimeout(1);
     }
 
 
@@ -43,7 +43,7 @@ public class GoBackNSender {
             }
 
             if (sequenceCounter < base + WINDOW_SIZE && currentSendingPos < packets.size()){
-                System.out.println("jSENT... seq=" + packets.get(currentSendingPos).getSequenceNumber());
+                System.out.println("SENT... seq=" + packets.get(currentSendingPos).getSequenceNumber());
                 sendPacket(packets.get(currentSendingPos));
 
                 if (base == currentSendingPos){
