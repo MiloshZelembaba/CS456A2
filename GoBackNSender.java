@@ -28,7 +28,7 @@ public class GoBackNSender {
             ByteBuffer buffer = ByteBuffer.allocate(Math.min(500, data.length - i));
             System.out.println(Math.min(500, data.length - i));
             for (int j=0; j<Math.min(500, data.length - i); j++){
-                buffer.put(data[j]);
+                buffer.put(data[i+j]);
             }
             Packet packet = createDataPacket(buffer.array());
             int packetLength = packet.getPacketLength();
