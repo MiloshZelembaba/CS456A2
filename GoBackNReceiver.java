@@ -29,8 +29,7 @@ public class GoBackNReceiver {
 
     public void receive() throws Exception{
         byte[] receiveData = new byte[512];
-        int expectedSequenceNumber = 0;
-        int lastReceived = -1;
+        int expectedSequenceNumber = -1;
 
         DatagramPacket receivePacket;
         FileOutputStream fos = new FileOutputStream(filePath,true);
@@ -43,18 +42,17 @@ public class GoBackNReceiver {
 
 
             if (packet instanceof DataPacket) {
-                if (packet.getSequenceNumber() == expectedSequenceNumber) {
-                    System.out.println("EXPECTED... seq=" + expectedSequenceNumber);
+                if (packet.getSequenceNumber() == expectedSequenceNumber+1) {
+                    System.out.println("EXPECTED... seq=" + expectedSequenceNumber+1);
                     // write recvInfo for the channel
                     fos.write(((DataPacket) packet).getData());
                     sendAck(expectedSequenceNumber);
-                    lastReceived = expectedSequenceNumber;
                     expectedSequenceNumber = (expectedSequenceNumber + 1)%256;
                     System.out.println("sending... seq=" + expectedSequenceNumber);
                 } else {
                     System.out.println("UNEXPECTED... seq=" + packet.getSequenceNumber());
                     sendAck(expectedSequenceNumber);
-                    System.out.println("sending... seq=" + lastReceived);
+                    System.out.println("sending... seq=" + expectedSequenceNumber);
                 }
             } else {
                 fos.close();

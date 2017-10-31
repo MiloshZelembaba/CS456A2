@@ -32,7 +32,7 @@ public class GoBackNSender {
         int currentSendingPos = 0;
         long startTime = 0;
         long endTime = 0;
-        int justSaw = -1;
+        int lastSaw = -1;
         DatagramPacket ackPacket;
         ArrayList<Packet> packets = new ArrayList<>(createAllPackets()); // not sure if i need to do it like this (with the copying)
 
@@ -62,9 +62,9 @@ public class GoBackNSender {
                 Packet packet = Packet.toPacket(ackPacket); // converts it to one of my packets i've defined
                 int ackNum = packet.getSequenceNumber();
                 System.out.println("JUST SAW... seq=" + ackNum);
-                if (ackNum > justSaw) {
-                    justSaw = ackNum;
-                    // TODO: i think the below works, need to check
+                // TODO: i think the below works, need to check
+                if (ackNum > lastSaw) {
+                    lastSaw = ackNum;
                     if (ackNum >= base % 256) {
                         base += ((ackNum - base % 256) + 1);
                     } else {
@@ -73,6 +73,7 @@ public class GoBackNSender {
                     System.out.println("started timer on(tryblock) base=" + base);
                     startTime = System.nanoTime();
                 }
+
             } catch (SocketTimeoutException e){}
 
             endTime = System.nanoTime();
