@@ -27,8 +27,9 @@ public class GoBackNReceiver {
 
     public void receive() throws Exception{
         byte[] receiveData = new byte[512];
+
         DatagramPacket receivePacket;
-        FileOutputStream fos = new FileOutputStream(filePath);
+        FileOutputStream fos = new FileOutputStream(filePath,true);
         while (true) {
             receivePacket = new DatagramPacket(receiveData, receiveData.length);
             serverSocket.receive(receivePacket);
