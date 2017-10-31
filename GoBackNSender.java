@@ -25,17 +25,15 @@ public class GoBackNSender {
         DatagramSocket clientSocket = new DatagramSocket();
 
         for (int i=0; i<data.length; i+=500){
-            System.out.println(i);
             ByteBuffer buffer = ByteBuffer.allocate(Math.min(500, data.length - i));
-            for (int j=i; j<Math.min(500, data.length - i); j++){
-                buffer.put(data[j-i]);
+            for (int j=0; j<Math.min(500, data.length - i); j++){
+                buffer.put(data[j]);
             }
             Packet packet = createDataPacket(buffer.array());
             int packetLength = packet.getPacketLength();
             byte[] bytes = packet.getBytes();
             String text = new String(buffer.array(), "UTF-8");
             char[] chars = text.toCharArray();
-            System.out.println(chars);
 
             DatagramPacket sendPacket = new DatagramPacket(bytes, packetLength, IPAddress, port);
             clientSocket.send(sendPacket);
