@@ -88,16 +88,17 @@ public class GoBackNSender {
 
         }
 
-
-
-
-
-
-
         // do this at the end ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         Packet packet = createEOTPacket();
         DatagramPacket sendPacket = new DatagramPacket(packet.getBytes(), packet.getPacketLength(), IPAddress, port);
         senderSocket.send(sendPacket);
+
+        byte[] receiveData = new byte[12];
+        DatagramPacket eotPacket = new DatagramPacket(receiveData, receiveData.length); // will timeout after 10ms
+        senderSocket.setSoTimeout(0); // set unlimited timeout value, since we're garunteed for EOT to arrive
+        senderSocket.receive(eotPacket);
+
+
         senderSocket.close();
     }
 

@@ -11,19 +11,19 @@ import java.util.Random;
  */
 public class GoBackNReceiver {
     final static int MAX_PORT = 65535;
-    private DatagramSocket serverSocket;
+    private DatagramSocket senderSocket;
     private String filePath;
     private int senderPort;
     private InetAddress senderIPAddress;
 
     public GoBackNReceiver(String filePath) throws Exception{
-        serverSocket = createUDPSocket(); // creates a UDP socket
+        senderSocket = createUDPSocket(); // creates a UDP socket
         this.filePath = filePath;
 
         // write recvInfo for the channel
         FileWriter fileWriter = new FileWriter("recvInfo");
-        String serverAddress = serverSocket.getLocalAddress().toString();
-        fileWriter.write(serverAddress.replace("/","") + " " +serverSocket.getLocalPort());
+        String serverAddress = senderSocket.getLocalAddress().toString();
+        fileWriter.write(serverAddress.replace("/","") + " " + senderSocket.getLocalPort());
         fileWriter.close();
     }
 
@@ -35,7 +35,7 @@ public class GoBackNReceiver {
         FileOutputStream fos = new FileOutputStream(filePath,true);
         while (true) {
             receivePacket = new DatagramPacket(receiveData, receiveData.length);
-            serverSocket.receive(receivePacket);
+            senderSocket.receive(receivePacket);
             Packet packet = Packet.toPacket(receivePacket); // converts it to one of my packets i've defined
             senderPort = receivePacket.getPort();
             senderIPAddress = receivePacket.getAddress();
@@ -54,12 +54,24 @@ public class GoBackNReceiver {
                     sendAck(expectedSequenceNumber);
                     System.out.println("sending... seq=" + expectedSequenceNumber);
                 }
-            } else {
+            } else { // EOT packet received
+                Packet eotPacket = createEOTPacket();
+                DatagramPacket sendPacket =
+                        new DatagramPacket(eotPacket.getBytes(), eotPacket.getPacketLength(), senderIPAddress, senderPort);
+                senderSocket.send(sendPacket);
+                senderSocket.close();
+
                 fos.close();
                 System.out.println("finished");
                 break;
             }
         }
+    }
+
+    private EndOfTransferPacket createEOTPacket(){
+        EndOfTransferPacket packet = new EndOfTransferPacket();
+
+        return packet;
     }
 
     public static DatagramSocket createUDPSocket(){
@@ -85,7 +97,7 @@ public class GoBackNReceiver {
 
         DatagramPacket sendPacket = new DatagramPacket(bytes, packetLength, senderIPAddress, senderPort);
         try {
-            serverSocket.send(sendPacket);
+            senderSocket.send(sendPacket);
         } catch (Exception e){}
     }
 
