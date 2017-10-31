@@ -23,7 +23,6 @@ public class Sender {
         if (protocol == GO_BACK_N){
             Path path = Paths.get(filePath);
             byte[] dataToSend = Files.readAllBytes(path);
-            System.out.println("data is this many bytes: " + dataToSend.length);
 
             GoBackNSender sender = new GoBackNSender(millisecondTimeout, dataToSend, serverAddress, port);
             sender.sendData();

@@ -1,4 +1,5 @@
 import java.net.*;
+import java.nio.ByteBuffer;
 
 /**
  * Created by miloshzelembaba on 2017-10-30.
@@ -23,22 +24,38 @@ public class GoBackNSender {
     public void sendData() throws Exception{
         DatagramSocket clientSocket = new DatagramSocket();
 
-        byte[] sendData;
+        for (int i=0; i<data.length; i+=500){
+            ByteBuffer buffer = ByteBuffer.allocate(Math.min(500, data.length - i));
+            for (int j=i; j<Math.min(500, data.length - i); j++){
+                buffer.put(data[j-i]);
+            }
+            Packet packet = createDataPacket(buffer.array());
+            int packetLength = packet.getPacketLength();
+            byte[] bytes = packet.getBytes();
+            System.out.println("PacketLength=" + packetLength + "   actualLength=" + bytes.length);
 
+            DatagramPacket sendPacket = new DatagramPacket(bytes, packetLength, IPAddress, port);
+            clientSocket.send(sendPacket);
 
-        Packet packet = createPacket(data);
-        int packetLength = packet.getPacketLength();
-        byte[] bytes = packet.getBytes();
-        System.out.println("PacketLength=" + packetLength + "   actualLength=" + bytes.length);
+            buffer.clear();
+        }
 
-        DatagramPacket sendPacket = new DatagramPacket(bytes, packetLength, IPAddress, port);
+        Packet packet = createEOTPacket();
+        DatagramPacket sendPacket = new DatagramPacket(packet.getBytes(), packet.getPacketLength(), IPAddress, port);
         clientSocket.send(sendPacket);
 
+        clientSocket.close();
     }
 
-    public DataPacket createPacket(byte[] curData) throws Exception{
+    private DataPacket createDataPacket(byte[] curData) throws Exception{
         DataPacket packet = new DataPacket(100);
         packet.setData(curData);
+
+        return packet;
+    }
+
+    private EndOfTransferPacket createEOTPacket(){
+        EndOfTransferPacket packet = new EndOfTransferPacket();
 
         return packet;
     }

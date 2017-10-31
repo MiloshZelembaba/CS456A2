@@ -28,19 +28,21 @@ public class GoBackNReceiver {
     public void receive() throws Exception{
         byte[] receiveData = new byte[512];
         DatagramPacket receivePacket;
+        FileOutputStream fos = new FileOutputStream(filePath);
         while (true) {
             receivePacket = new DatagramPacket(receiveData, receiveData.length);
             serverSocket.receive(receivePacket);
             Packet packet = Packet.toPacket(receivePacket); // converts it to one of my packets i've defined
 
-            // write recvInfo for the channel
-            FileOutputStream fos = new FileOutputStream(filePath);
-            fos.write(((DataPacket)packet).getData());
-            fos.close();
-
-
-            System.out.println("finished");
-            break;
+            if (packet instanceof DataPacket) {
+                System.out.println("datapacket received");
+                // write recvInfo for the channel
+                fos.write(((DataPacket) packet).getData());
+            } else {
+                fos.close();
+                System.out.println("finished");
+                break;
+            }
         }
     }
 
